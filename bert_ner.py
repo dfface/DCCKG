@@ -220,12 +220,13 @@ def main():
                         csv_eval_result_file_to_write_dict['date'] = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
                         csv_eval_result_file_to_write_dict['step'] = global_step
                         csv_eval_result_file_writer.writerow(csv_eval_result_file_to_write_dict)
+                        csv_eval_result_file.flush()
                         print(str(csv_eval_result_file_to_write_dict))
                         # wandb 每 call 一次会增加一次 step 哦，所以只在这里调用
                         wandb.log({
-                            "acc": p[0],
-                            "recall": r[0],
-                            "f1": f1[0],
+                            "acc": row[1],
+                            "recall": row[2],
+                            "f1": row[3],
                             "train_loss": tr_loss / nb_tr_steps
                         })
                 output_eval_file = os.path.join(output_dir, "eval_results.txt")
