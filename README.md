@@ -21,6 +21,10 @@ python run_bert_ner.py
 cat checkpoints/eval_results.csv
 ```
 
+## Result
+
+![BERT](./postprocess/result.png)
+
 ## Reference
 
 * [zjunlp/DeepKE](https://github.com/zjunlp/DeepKE): v0.2.97
