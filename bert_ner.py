@@ -11,10 +11,6 @@ from tqdm import tqdm, trange
 from seqeval.metrics import classification_report
 from tools.deepke.name_entity_re.standard import *
 
-logging.basicConfig(format='%(asctime)s - %(levelname)s - %(name)s - %(message)s',
-                    datefmt='%m/%d/%Y %H:%M:%S',
-                    level=logging.INFO)
-logger = logging.getLogger(__name__)
 
 wandb.init(project="DoctorKG-NER-Example")
 
@@ -59,8 +55,8 @@ def main():
     learning_rate = 5e-5
     bert_model = "bert-base-chinese"
     data_dir = "data"  # 其下的数据务必命名为 train.txt/test.txt/valid.txt
-    eval_batch_size = 16
-    eval_on = "dev"
+    eval_batch_size = 32
+    eval_on = "test"
     task_name = "ner"
     seed = 42
     do_lower_case = True
@@ -68,7 +64,7 @@ def main():
     weight_decay = 0.01
     max_grad_norm = 1.0
     max_seq_length = 128
-    num_train_epochs = 10  # the number of training epochs
+    num_train_epochs = 20  # the number of training epochs
     train_batch_size = 32
     every_n_step = 1  # 每 n 步进行一次 eval 测试
     # 参数检查 #
@@ -135,6 +131,7 @@ def main():
         tr_loss = 0
         nb_tr_examples, nb_tr_steps = 0, 0
         for step, batch in enumerate(tqdm(train_dataloader, desc="Iteration")):
+            model.train()
             batch = tuple(t.to(device) for t in batch)
             input_ids, input_mask, segment_ids, label_ids, valid_ids, l_mask = batch
             loss = model(input_ids, segment_ids, input_mask, label_ids, valid_ids, l_mask, device)
@@ -150,7 +147,7 @@ def main():
                 scheduler.step()  # Update learning rate schedule
                 model.zero_grad()
             global_step += 1
-            print("train_loss: " + str(tr_loss / nb_tr_steps))
+            # print("train_loss: " + str(tr_loss / nb_tr_steps))
             # Evaling!
             if global_step % every_n_step == 0:
                 # 测试
@@ -175,7 +172,7 @@ def main():
                 y_true = []
                 y_pred = []
                 label_map = {i: label for i, label in enumerate(label_list, 1)}
-                print(label_map)
+                # print(label_map)
                 for input_ids, input_mask, segment_ids, label_ids, valid_ids, l_mask in tqdm(eval_dataloader, desc="Evaluating"):
                     input_ids = input_ids.to(device)
                     input_mask = input_mask.to(device)
@@ -193,7 +190,8 @@ def main():
                         temp_1 = []
                         temp_2 = []
                         for j, m in enumerate(label):
-                            if m == 0 or logits[i][j] == 0 or label_ids[i][j] == 0:  # bugfix: 它这里之前写的有问题，得改，否则 KeyError
+                            # m == 0 就是 label_ids[i][j] == 0
+                            if m == 0 or logits[i][j] == 0:  # bugfix: 它这里之前写的有问题，得改，否则 KeyError 0
                                 continue
                             elif label_ids[i][j] == len(label_map):  # attention: [SEP]是最后一个（编号为len(label_map)）表示分隔
                                 y_true.append(temp_1)
@@ -221,7 +219,7 @@ def main():
                         csv_eval_result_file_to_write_dict['step'] = global_step
                         csv_eval_result_file_writer.writerow(csv_eval_result_file_to_write_dict)
                         csv_eval_result_file.flush()
-                        print(str(csv_eval_result_file_to_write_dict))
+                        # print(str(csv_eval_result_file_to_write_dict))
                         # wandb 每 call 一次会增加一次 step 哦，所以只在这里调用
                         wandb.log({
                             "acc": row[1],
@@ -231,8 +229,6 @@ def main():
                         })
                 output_eval_file = os.path.join(output_dir, "eval_results.txt")
                 with open(output_eval_file, "a") as writer:
-                    logger.info("***** Eval results *****")
-                    logger.info("\n%s", report)
                     writer.write(report)
     # Save a trained model and the associated configuration
     model_to_save = model.module if hasattr(model, 'module') else model  # Only save the model it-self

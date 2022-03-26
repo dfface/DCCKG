@@ -1,18 +1,29 @@
-## BERT-NER
+# DoctorKG
 
-在 DeepKE 0.2.97 的 example/ner/standard 上修改，并修复了其中的 bug 。
+This is the code repository for DoctorKG.
 
-`bert_ner.py` 逻辑：
+Now, it concludes:
 
-### 使用方法
+* Dataset Preprocess example
+* BERT NER example
 
+## Quick Start
 
-## 如何用 BERT 跑自己的数据？
+```shell
+conda create -n DoctorKG python=3.8
+conda activate DoctorKG
 
-### 制作自己的数据集
+pip install -r requirements.txt
 
-### 添加自己的标签
+python bert_ner.py
 
-### 开始自己的模型训练
+cat checkpoints/eval_results.csv
+```
 
+## Reference
+
+* [zjunlp/DeepKE](https://github.com/zjunlp/DeepKE): v0.2.97
+* [doccano/doccano-transformer](https://github.com/doccano/doccano-transformer): v1.0.2
+* [lacusrinz/doccano-transformer](https://github.com/lacusrinz/doccano-transformer)
+* [RocioLiu/bert_chinese_ner](https://github.com/RocioLiu/bert_chinese_ner)
 
