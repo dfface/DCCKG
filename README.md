@@ -2,10 +2,11 @@
 
 This is the code repository for DoctorKG.
 
-Now, it concludes:
+Now, it includes:
 
 * Dataset Preprocess example
 * BERT NER example
+* Result Postprocess plot example
 
 ## Quick Start
 
@@ -15,7 +16,7 @@ conda activate DoctorKG
 
 pip install -r requirements.txt
 
-python bert_ner.py
+python run_bert_ner.py
 
 cat checkpoints/eval_results.csv
 ```

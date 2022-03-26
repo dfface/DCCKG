@@ -64,7 +64,7 @@ def main():
     weight_decay = 0.01
     max_grad_norm = 1.0
     max_seq_length = 128
-    num_train_epochs = 20  # the number of training epochs
+    num_train_epochs = 30  # the number of training epochs
     train_batch_size = 32
     every_n_step = 1  # 每 n 步进行一次 eval 测试
     # 参数检查 #
@@ -90,13 +90,14 @@ def main():
     model.to(device)
     # CSV 文件记录参数
     global_step = 0
-    csv_eval_result_file = open(os.path.join(output_dir, "eval_results.csv"), "a")
-    csv_eval_result_file_fieldnames = ['date', 'step', 'eval_acc', 'eval_recall', 'eval_f1', 'train_loss']
+    csv_eval_result_file = open(os.path.join(output_dir, "eval_results.csv"), "w")
+    csv_eval_result_file_fieldnames = ['date', 'step', 'eval_precision', 'eval_recall', 'eval_f1', 'train_loss']
     csv_eval_result_file_writer = csv.DictWriter(csv_eval_result_file, fieldnames=csv_eval_result_file_fieldnames)
+    csv_eval_result_file_writer.writeheader()
     csv_eval_result_file_to_write_dict = {
         "date": datetime.now().strftime('%Y-%m-%d %H:%M:%S'),
         "step": global_step,
-        "eval_acc": None,
+        "eval_precision": None,
         "eval_recall": None,
         "eval_f1": None,
         "train_loss": None,
@@ -212,7 +213,7 @@ def main():
                     # print(row)
                     if row[0] == 'SCH':  # 对自己标签的结果，记载一下
                         csv_eval_result_file_to_write_dict['train_loss'] = tr_loss / nb_tr_steps
-                        csv_eval_result_file_to_write_dict['eval_acc'] = row[1]
+                        csv_eval_result_file_to_write_dict['eval_precision'] = row[1]
                         csv_eval_result_file_to_write_dict['eval_recall'] = row[2]
                         csv_eval_result_file_to_write_dict['eval_f1'] = row[3]
                         csv_eval_result_file_to_write_dict['date'] = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
@@ -228,7 +229,7 @@ def main():
                             "train_loss": tr_loss / nb_tr_steps
                         })
                 output_eval_file = os.path.join(output_dir, "eval_results.txt")
-                with open(output_eval_file, "a") as writer:
+                with open(output_eval_file, "w") as writer:
                     writer.write(report)
     # Save a trained model and the associated configuration
     model_to_save = model.module if hasattr(model, 'module') else model  # Only save the model it-self
